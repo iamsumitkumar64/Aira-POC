@@ -19,6 +19,24 @@ export const renderers: Record<string,(node:StatementNode,context:Context)=>HTML
     const update=()=>{const entry=c.timers.list().find(t=>t.id===key);if(!entry)return;const seconds=Math.ceil(entry.remaining);value.textContent=`${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;status.textContent=entry.status;start.hidden=entry.status==='running'||entry.status==='paused';start.textContent=entry.status==='done'?'Restart simulation':'Start simulation';pause.hidden=entry.status==='stopped'||entry.status==='done';pause.textContent=entry.status==='paused'?'Resume timer':'Pause timer';for(const b of [start,pause,reset,finish])b.disabled=c.paused;};
     c.updates.push(update);update();return n;
   },
+  StatCard: ({props:p}) => {
+    const n=el('div','','stat-card');
+    n.append(el('span',String(p.value),'stat-value'),el('span',String(p.label),'stat-label'));
+    if(p.subtext)n.append(el('span',String(p.subtext),'stat-subtext'));
+    return n;
+  },
+  Badge: ({props:p}) => el('span',String(p.text),'badge badge-'+String(p.variant??'primary')),
+  ProgressBar: ({props:p}) => {
+    const n=el('div','','workout-progress');
+    const pct=Math.max(0,Math.min(100,Math.round((Number(p.current)/Number(p.total))*100)));
+    const track=el('div','','workout-progress-track');
+    const fill=el('div','','workout-progress-fill');
+    fill.style.width=pct+'%';
+    track.append(fill);
+    if(p.label)n.append(el('span',String(p.label),'micro'));
+    n.append(track);
+    return n;
+  },
 };
 export function renderComponent(node:StatementNode,context:Context):HTMLElement {
   if(!Object.hasOwn(renderers,node.name))throw new Error('No renderer for '+node.name);
